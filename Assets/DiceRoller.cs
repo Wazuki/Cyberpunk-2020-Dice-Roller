@@ -7,15 +7,44 @@ using UnityEngine.EventSystems;
 
 public class DiceRoller : MonoBehaviour
 {
+    const int ARMOR_LOCATIONS = 6;
+    const int HEAD = 0;
+    const int TORSO = 1;
+    const int RIGHT_ARM = 2;
+    const int LEFT_ARM = 3;
+    const int RIGHT_LEG = 4;
+    const int LEFT_LEG = 5;
 
     struct CharacterArmor
     {
-        public int headArmorVal; public bool headIsHard;
-        public int torsoArmorVal; public bool torsoIsHard;
-        public int leftArmArmorVal; public bool leftArmIsHard;
-        public int rightArmArmorVal; public bool rightArmIsHard;
-        public int leftLegArmorVal; public bool leftLegIsHard;
-        public int rightLegArmorVal; public bool rightLegIsHard;
+        //public int headArmorVal; public bool headIsHard;
+        //public int torsoArmorVal; public bool torsoIsHard;
+        //public int leftArmArmorVal; public bool leftArmIsHard;
+        //public int rightArmArmorVal; public bool rightArmIsHard;
+        //public int leftLegArmorVal; public bool leftLegIsHard;
+        //public int rightLegArmorVal; public bool rightLegIsHard;
+
+        public int[] armorVal;
+        public bool[] isHard;
+
+        public void Initialize()
+        {
+            //armorVal = new List<int>(ARMOR_LOCATIONS);
+            //isHard = new List<bool>(ARMOR_LOCATIONS);
+            armorVal = new int[ARMOR_LOCATIONS];
+            isHard = new bool[ARMOR_LOCATIONS];
+
+            ResetArmorValues();
+        }
+
+        public void ResetArmorValues()
+        {
+            for (int x = 0; x < ARMOR_LOCATIONS; x++)
+            {
+                armorVal[x] = 0;
+                isHard[x] = false;
+            }
+        }
     }
 
     CharacterArmor targetArmor;
@@ -27,36 +56,51 @@ public class DiceRoller : MonoBehaviour
     public InputField hitBonusInput;
     public InputField targetNumberInput;
 
-    public InputField headArmorInputField, torsoArmorInputField, leftArmArmorInputField, rightArmArmorInputField, leftLegArmorInputField, rightLegArmorInputField;
-    public Toggle headHardToggle, torsoHardToggle, leftArmHardToggle, rightArmHardToggle, leftLegHardToggle, rightLegHardToggle;
+    //public InputField headArmorInputField, torsoArmorInputField, leftArmArmorInputField, rightArmArmorInputField, leftLegArmorInputField, rightLegArmorInputField;
+    //public Toggle headHardToggle, torsoHardToggle, leftArmHardToggle, rightArmHardToggle, leftLegHardToggle, rightLegHardToggle;
 
+    public List<InputField> armorInputFields;
+    public List<Toggle> armorhardnessToggles;
+
+    private Dictionary<int, int> hitLocationArmorArrayLocationPair;
+
+    public Toggle terseOutputToggle;
+    public Toggle verboseOutputToggle;
     public Text resultsText;
 
 
     void ResetTargetArmorValues()
     {
-        targetArmor.headArmorVal = 0; targetArmor.headIsHard = false;
-        targetArmor.torsoArmorVal = 0; targetArmor.torsoIsHard = false;
-        targetArmor.leftArmArmorVal = 0; targetArmor.leftArmIsHard = false;
-        targetArmor.rightArmArmorVal = 0; targetArmor.rightArmIsHard = false;
-        targetArmor.leftLegArmorVal = 0; targetArmor.leftLegIsHard = false;
-        targetArmor.rightLegArmorVal = 0; targetArmor.rightLegIsHard = false;
+        //targetArmor.headArmorVal = 0; targetArmor.headIsHard = false;
+        //targetArmor.torsoArmorVal = 0; targetArmor.torsoIsHard = false;
+        //targetArmor.leftArmArmorVal = 0; targetArmor.leftArmIsHard = false;
+        //targetArmor.rightArmArmorVal = 0; targetArmor.rightArmIsHard = false;
+        //targetArmor.leftLegArmorVal = 0; targetArmor.leftLegIsHard = false;
+        //targetArmor.rightLegArmorVal = 0; targetArmor.rightLegIsHard = false;
     }
     
     void GetTargetArmorValues()
     {
-        targetArmor.headArmorVal = System.Int32.Parse(headArmorInputField.text);
-        targetArmor.headIsHard = headHardToggle.enabled;
-        targetArmor.torsoArmorVal = System.Int32.Parse(torsoArmorInputField.text);
-        targetArmor.torsoIsHard = torsoHardToggle.enabled;
-        targetArmor.leftArmArmorVal = System.Int32.Parse(leftArmArmorInputField.text);
-        targetArmor.leftArmIsHard = leftArmHardToggle.enabled;
-        targetArmor.rightArmArmorVal = System.Int32.Parse(rightArmArmorInputField.text);
-        targetArmor.rightArmIsHard = rightArmHardToggle.enabled;
-        targetArmor.leftLegArmorVal = System.Int32.Parse(leftLegArmorInputField.text);
-        targetArmor.leftLegIsHard = leftLegHardToggle.enabled;
-        targetArmor.rightLegArmorVal = System.Int32.Parse(rightLegArmorInputField.text);
-        targetArmor.rightLegIsHard = rightLegHardToggle.enabled;
+        //targetArmor.headArmorVal = System.Int32.Parse(headArmorInputField.text);
+        //targetArmor.headIsHard = headHardToggle.enabled;
+        //targetArmor.torsoArmorVal = System.Int32.Parse(torsoArmorInputField.text);
+        //targetArmor.torsoIsHard = torsoHardToggle.enabled;
+        //targetArmor.leftArmArmorVal = System.Int32.Parse(leftArmArmorInputField.text);
+        //targetArmor.leftArmIsHard = leftArmHardToggle.enabled;
+        //targetArmor.rightArmArmorVal = System.Int32.Parse(rightArmArmorInputField.text);
+        //targetArmor.rightArmIsHard = rightArmHardToggle.enabled;
+        //targetArmor.leftLegArmorVal = System.Int32.Parse(leftLegArmorInputField.text);
+        //targetArmor.leftLegIsHard = leftLegHardToggle.enabled;
+        //targetArmor.rightLegArmorVal = System.Int32.Parse(rightLegArmorInputField.text);
+        //targetArmor.rightLegIsHard = rightLegHardToggle.enabled;
+
+        for(int x = 0; x < ARMOR_LOCATIONS; x++)
+        {
+            int armorVal = 0;
+            if (!System.Int32.TryParse(armorInputFields[x].text, out armorVal)) armorVal = 0;
+            targetArmor.armorVal[x] = armorVal;
+            targetArmor.isHard[x] = armorhardnessToggles[x].isOn;
+        }
     }
 
     void Awake()
@@ -66,7 +110,20 @@ public class DiceRoller : MonoBehaviour
 
     void Start()
     {
-        ResetTargetArmorValues();
+        targetArmor.Initialize();
+
+        hitLocationArmorArrayLocationPair = new Dictionary<int, int>();
+        //Initialize location string armor array dictionary
+        hitLocationArmorArrayLocationPair[1] = HEAD;
+        hitLocationArmorArrayLocationPair[2] = TORSO;
+        hitLocationArmorArrayLocationPair[3] = TORSO;
+        hitLocationArmorArrayLocationPair[4] = TORSO;
+        hitLocationArmorArrayLocationPair[5] = RIGHT_ARM;
+        hitLocationArmorArrayLocationPair[6] = LEFT_ARM;
+        hitLocationArmorArrayLocationPair[7] = RIGHT_LEG;
+        hitLocationArmorArrayLocationPair[8] = RIGHT_LEG;
+        hitLocationArmorArrayLocationPair[9] = LEFT_LEG;
+        hitLocationArmorArrayLocationPair[10] = LEFT_LEG;
 
         //Intialize number dice and dice sides dropdowns
         List<Dropdown.OptionData> dataToAdd = new List<Dropdown.OptionData>();
@@ -194,41 +251,43 @@ public class DiceRoller : MonoBehaviour
 
     int GetArmorAtHitLocation(int hitLoc, ref bool armorLocHard)
     {
-        switch(hitLoc)
-        {
-            case 1:
-                Debug.Log("Hit head!");
-                armorLocHard = targetArmor.headIsHard;
-                return targetArmor.headArmorVal;
-            case 2:
-            case 3:
-            case 4:
-                Debug.Log("Hit torso!");
-                armorLocHard = targetArmor.torsoIsHard;
-                return targetArmor.torsoArmorVal;
-            case 5:
-                Debug.Log("Hit right arm!");
-                armorLocHard = targetArmor.rightArmIsHard;
-                return targetArmor.rightArmArmorVal;
-            case 6:
-                Debug.Log("Hit left arm!");
-                armorLocHard = targetArmor.leftArmIsHard;
-                return targetArmor.leftArmArmorVal;
-            case 7:
-            case 8:
-                Debug.Log("Hit right leg!");
-                armorLocHard = targetArmor.rightLegIsHard;
-                return targetArmor.rightLegArmorVal;
-            case 9:
-            case 10:
-                Debug.Log("Hit left leg!");
-                armorLocHard = targetArmor.leftLegIsHard;
-                return targetArmor.leftLegArmorVal;
-            default:
-                Debug.LogAssertion("Something went wrong with the hit script!");
-                return 0;
+        armorLocHard = targetArmor.isHard[hitLocationArmorArrayLocationPair[hitLoc]];
+        return targetArmor.armorVal[hitLocationArmorArrayLocationPair[hitLoc]];
+        //switch (hitLoc)
+        //{
+        //    case 1:
+        //        Debug.Log("Hit head!");
+        //        armorLocHard = targetArmor.isHard[hitLocationArmorArrayLocationPair[hitLoc]];
+        //        return targetArmor.headArmorVal;
+        //    case 2:
+        //    case 3:
+        //    case 4:
+        //        Debug.Log("Hit torso!");
+        //        armorLocHard = targetArmor.torsoIsHard;
+        //        return targetArmor.torsoArmorVal;
+        //    case 5:
+        //        Debug.Log("Hit right arm!");
+        //        armorLocHard = targetArmor.rightArmIsHard;
+        //        return targetArmor.rightArmArmorVal;
+        //    case 6:
+        //        Debug.Log("Hit left arm!");
+        //        armorLocHard = targetArmor.leftArmIsHard;
+        //        return targetArmor.leftArmArmorVal;
+        //    case 7:
+        //    case 8:
+        //        Debug.Log("Hit right leg!");
+        //        armorLocHard = targetArmor.rightLegIsHard;
+        //        return targetArmor.rightLegArmorVal;
+        //    case 9:
+        //    case 10:
+        //        Debug.Log("Hit left leg!");
+        //        armorLocHard = targetArmor.leftLegIsHard;
+        //        return targetArmor.leftLegArmorVal;
+        //    default:
+        //        Debug.LogAssertion("Something went wrong with the hit script!");
+        //        return 0;
 
-        }
+        //}
     }
 
 
@@ -257,7 +316,21 @@ public class DiceRoller : MonoBehaviour
 
         //Debug.LogWarning("Rolled " + dmgRolled + " vs. armor " + armorAtLocation + " for " + damageDealt + " damage");
         Debug.Log("Dealt " + damageDealt + " to location " + GetHitLocationName(hitLoc));
-        resultsText.text += damageDealt.ToString() + " Damage - " + GetHitLocationName(hitLoc) + "\n";
+
+        string outputString = "";
+        //Terse output
+        if(terseOutputToggle.isOn)
+        {
+            outputString = damageDealt.ToString() + " Damage - " + GetHitLocationName(hitLoc) + "\n";
+        }
+        else if(verboseOutputToggle.isOn)
+        {
+            outputString =  "Rolled " + numDamageDice.ToString() + "d" + damageDiceSides.ToString() +
+                            ", dealing " + damageDealt.ToString() + " to the " + GetHitLocationName(hitLoc) + 
+                            " which had " + targetArmor.armorVal[hitLocationArmorArrayLocationPair[hitLoc]].ToString() + " armor\n";
+        }
+
+        resultsText.text += outputString;
     }
 
     public void ReturnButton()
