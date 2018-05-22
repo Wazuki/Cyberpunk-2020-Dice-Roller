@@ -55,6 +55,7 @@ public class DiceRoller : MonoBehaviour
     public InputField rateOfFireInput;
     public InputField hitBonusInput;
     public InputField targetNumberInput;
+    public GameObject mainmenu;
 
     //public InputField headArmorInputField, torsoArmorInputField, leftArmArmorInputField, rightArmArmorInputField, leftLegArmorInputField, rightLegArmorInputField;
     //public Toggle headHardToggle, torsoHardToggle, leftArmHardToggle, rightArmHardToggle, leftLegHardToggle, rightLegHardToggle;
@@ -155,8 +156,13 @@ public class DiceRoller : MonoBehaviour
     {
         GetTargetArmorValues();
 
-        int hitBonus = System.Int32.Parse(hitBonusInput.text);
-        int targetNum = System.Int32.Parse(targetNumberInput.text);
+        int hitBonus;
+        int targetNum;
+        int rof;
+
+        if (!System.Int32.TryParse(hitBonusInput.text, out hitBonus)) hitBonus = 0;
+        if (!System.Int32.TryParse(targetNumberInput.text, out targetNum)) targetNum = 0;
+        if (!System.Int32.TryParse(rateOfFireInput.text, out rof)) rof = 1;
 
         //Roll attack
         int hitRoll = 0;
@@ -172,14 +178,16 @@ public class DiceRoller : MonoBehaviour
 
         attackRoll = hitRoll + hitBonus;
         //Debug.Log("Rolled (" + hitRoll + "+" + hitBonus + ") " + attackRoll + " vs. TGT " + targetNum);
+        resultsText.text += "Rolled " + attackRoll + " vs TN" + targetNum + " - ";
         if (attackRoll >= targetNum)
         {
             if(fullAutoToggle.isOn)
             {
                 int numHits = attackRoll - targetNum;
-                int rof = System.Int32.Parse(rateOfFireInput.text);
                 if (numHits > rof) numHits = rof;
                 Debug.Log("Hit " + numHits + " times with full auto!");
+
+                resultsText.text += "Hit " + numHits + " time(s)\n";
                 for(int x = 0; x < numHits; x++)
                 {
                     RollDamage();
@@ -189,6 +197,7 @@ public class DiceRoller : MonoBehaviour
             {
                 int numHits = Random.Range(1, 4);
                 Debug.Log("Hit " + numHits + " times with three-round burst!");
+                resultsText.text += "Hit " + numHits + " time(s)\n";
                 for (int x = 0; x < numHits; x++)
                 {
                     RollDamage();
@@ -289,7 +298,6 @@ public class DiceRoller : MonoBehaviour
 
         //}
     }
-
 
     void RollDamage()
     {
