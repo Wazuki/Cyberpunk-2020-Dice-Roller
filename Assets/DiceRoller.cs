@@ -7,7 +7,6 @@ using UnityEngine.EventSystems;
 
 public class DiceRoller : MonoBehaviour
 {
-    const int ARMOR_LOCATIONS = 6;
     const int HEAD = 0;
     const int TORSO = 1;
     const int RIGHT_ARM = 2;
@@ -15,39 +14,9 @@ public class DiceRoller : MonoBehaviour
     const int RIGHT_LEG = 4;
     const int LEFT_LEG = 5;
 
-    struct CharacterArmor
-    {
-        //public int headArmorVal; public bool headIsHard;
-        //public int torsoArmorVal; public bool torsoIsHard;
-        //public int leftArmArmorVal; public bool leftArmIsHard;
-        //public int rightArmArmorVal; public bool rightArmIsHard;
-        //public int leftLegArmorVal; public bool leftLegIsHard;
-        //public int rightLegArmorVal; public bool rightLegIsHard;
 
-        public int[] armorVal;
-        public bool[] isHard;
 
-        public void Initialize()
-        {
-            //armorVal = new List<int>(ARMOR_LOCATIONS);
-            //isHard = new List<bool>(ARMOR_LOCATIONS);
-            armorVal = new int[ARMOR_LOCATIONS];
-            isHard = new bool[ARMOR_LOCATIONS];
-
-            ResetArmorValues();
-        }
-
-        public void ResetArmorValues()
-        {
-            for (int x = 0; x < ARMOR_LOCATIONS; x++)
-            {
-                armorVal[x] = 0;
-                isHard[x] = false;
-            }
-        }
-    }
-
-    CharacterArmor targetArmor;
+    CharacterArmor targetArmor = new CharacterArmor();
     public RectTransform damagePanel, armorPanel, resultsPanel;
     public Dropdown numDamageDiceDropdown, damageDiceSidesDropdown;
     public Toggle apRoundToggle;
@@ -95,11 +64,12 @@ public class DiceRoller : MonoBehaviour
         //targetArmor.rightLegArmorVal = System.Int32.Parse(rightLegArmorInputField.text);
         //targetArmor.rightLegIsHard = rightLegHardToggle.enabled;
 
-        for(int x = 0; x < ARMOR_LOCATIONS; x++)
+        for(int x = 0; x < CharacterArmor.ARMOR_LOCATIONS; x++)
         {
-            int armorVal = 0;
-            if (!System.Int32.TryParse(armorInputFields[x].text, out armorVal)) armorVal = 0;
-            targetArmor.armorVal[x] = armorVal;
+            //int armorVal = 0;
+            //if (!System.Int32.TryParse(armorInputFields[x].text, out armorVal)) armorVal = 0;
+            //targetArmor.armorVal[x] = armorVal;
+            targetArmor.AssignArmorValue(armorInputFields[x].text, x);
             targetArmor.isHard[x] = armorhardnessToggles[x].isOn;
         }
     }
@@ -142,6 +112,7 @@ public class DiceRoller : MonoBehaviour
     
     public void ToggleArmorPanel()
     {
+        damagePanel.gameObject.SetActive(!damagePanel.gameObject.activeSelf);
         armorPanel.gameObject.SetActive(!armorPanel.gameObject.activeSelf);
     }
 
@@ -345,6 +316,43 @@ public class DiceRoller : MonoBehaviour
     {
         resultsPanel.gameObject.SetActive(false);
         armorPanel.gameObject.SetActive(false);
+        damagePanel.gameObject.SetActive(true);
+    }
+
+    public void ClearDamageRollerButton()
+    {
+        ModalPanel modalPanel = ModalPanel.Instance();
+
+        modalPanel.Choice("Clear damage roll data?", ClearDamageRollerAction, AbortAction);
+    }
+
+    public void ClearArmorButton()
+    {
+        ModalPanel modalPanel = ModalPanel.Instance();
+
+        modalPanel.Choice("Clear armor data?", ClearArmorAction, AbortAction);
+    }
+
+    public void ClearDamageRollerAction()
+    {
+        rateOfFireInput.text = "";
+        targetNumberInput.text = "";
+        hitBonusInput.text = "";
+        apRoundToggle.isOn = false;
+    }
+
+    public void ClearArmorAction()
+    {
+        for(int x = 0; x < CharacterArmor.ARMOR_LOCATIONS; x++)
+        {
+            armorInputFields[x].text = "";
+            armorhardnessToggles[x].isOn = false;
+        }
+    }
+
+    public void AbortAction()
+    {
+        Debug.Log("Action aborted!");
     }
 
 }

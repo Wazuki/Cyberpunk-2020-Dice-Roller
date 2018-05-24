@@ -4,12 +4,12 @@ using UnityEngine;
 
 public class MainMenuButton : MonoBehaviour {
 
-    [SerializeField] GameObject mainMenu;
-    [SerializeField] GameObject targetObject;
+    [SerializeField] GameObject objectToShow;
+    [SerializeField] GameObject objectToHide;
 
     public void MainMenuButton_OnClickHandler()
     {
-        mainMenu.SetActive(!mainMenu.activeSelf);
-        targetObject.SetActive(!targetObject.activeSelf);
+        objectToShow.SetActive(!objectToShow.activeSelf);
+        objectToHide.SetActive(!objectToHide.activeSelf);
     }
 }
