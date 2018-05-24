@@ -38,6 +38,8 @@ public class DiceRoller : MonoBehaviour
     public Toggle verboseOutputToggle;
     public Text resultsText;
 
+    [SerializeField] ArmorProfileLoader profileLoader;
+    
 
     void ResetTargetArmorValues()
     {
@@ -346,8 +348,13 @@ public class DiceRoller : MonoBehaviour
         for(int x = 0; x < CharacterArmor.ARMOR_LOCATIONS; x++)
         {
             armorInputFields[x].text = "";
+            armorInputFields[x].interactable = true;
+
             armorhardnessToggles[x].isOn = false;
+            armorhardnessToggles[x].interactable = true;
         }
+
+        profileLoader.SelectNewProfle();
     }
 
     public void AbortAction()
@@ -355,4 +362,17 @@ public class DiceRoller : MonoBehaviour
         Debug.Log("Action aborted!");
     }
 
+
+    public void SelectArmorProfle(CharacterArmor profile)
+    {
+        for(int x = 0; x < CharacterArmor.ARMOR_LOCATIONS; x++)
+        {
+            //Enter the values of the current profile into the input fields and then disable their interaction.
+            armorInputFields[x].text = profile.armorVal[x].ToString();
+            armorInputFields[x].interactable = false;
+
+            armorhardnessToggles[x].isOn = profile.isHard[x];
+            armorhardnessToggles[x].interactable = false;
+        }
+    }
 }
