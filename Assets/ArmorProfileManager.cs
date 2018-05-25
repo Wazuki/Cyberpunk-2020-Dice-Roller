@@ -7,8 +7,10 @@ using System.IO;
 
 public class ArmorProfileManager : MonoBehaviour
 {
-    [SerializeField] public List<CharacterArmor> armorProfileList;
-    [SerializeField]
+
+    public List<CharacterArmor> armorProfileList;
+    [SerializeField] RectTransform profileManagerContent;
+    [SerializeField] GameObject profileManagerPrefabButton;
 
     public InputField profileNameInputField;
 
@@ -71,7 +73,7 @@ public class ArmorProfileManager : MonoBehaviour
         //string armorProfileJSON = JsonUtility.ToJson(armorProfileList, true);
         string armorProfileJSON = JsonHelper.ToJson(armorProfileList, true);
         File.WriteAllText(filePath, armorProfileJSON);
-
+        ReloadList();
     }
 
     public void AbortAction()
@@ -119,4 +121,50 @@ public class ArmorProfileManager : MonoBehaviour
         saveButton.interactable = false;
     }
 
+    public void InitializeProfileManger()
+    {
+        foreach (Transform c in profileManagerContent.transform) Destroy(c.gameObject);
+
+        for(int x = 0; x < armorProfileList.Count; x++)
+        {
+            //Instantiate a copy of the prefab button manager, call its initializer with the current profile.
+            GameObject newButton = Instantiate(profileManagerPrefabButton, profileManagerContent);
+            newButton.GetComponent<CharacterArmorReference>().AssignProfile(armorProfileList[x]);
+        }
+    }
+
+    public void DeleteProfiles()
+    {
+        //Confirm that profiles are going to be deleted.
+        ModalPanel modalPanel = ModalPanel.Instance();
+        modalPanel.Choice("Delete profiles?", ConfirmProfileDeletion, AbortAction);
+    }
+
+    public void ConfirmProfileDeletion()
+    {
+        for (int x = profileManagerContent.childCount - 1; x >= 0; x--)
+        {
+            CharacterArmorReference characterArmorRef = profileManagerContent.GetChild(x).GetComponent<CharacterArmorReference>();
+
+            if (characterArmorRef.selected)
+            {
+                armorProfileList.Remove(characterArmorRef.profile);
+
+            }
+
+            Destroy(profileManagerContent.GetChild(x).gameObject);
+        }
+
+        string armorProfileJSON = JsonHelper.ToJson(armorProfileList, true);
+        File.WriteAllText(filePath, armorProfileJSON);
+
+        ReloadList();
+        InitializeProfileManger();
+    }
+
+    private void ReloadList()
+    {
+        armorProfileList.Clear();
+        LoadArmorProfles();
+    }
 }
