@@ -14,7 +14,9 @@ public class DiceRoller : MonoBehaviour
     const int RIGHT_LEG = 4;
     const int LEFT_LEG = 5;
 
+    readonly int[] VALID_DAMAGE_DICE = { 6, 10 };
 
+    string outputString;
 
     CharacterArmor targetArmor = new CharacterArmor();
     public RectTransform damagePanel, armorPanel, resultsPanel;
@@ -99,14 +101,16 @@ public class DiceRoller : MonoBehaviour
         hitLocationArmorArrayLocationPair[10] = LEFT_LEG;
 
         //Intialize number dice and dice sides dropdowns
-        List<Dropdown.OptionData> dataToAdd = new List<Dropdown.OptionData>();
-        for (int x = 1; x < 11; x++)
-        {
-            Dropdown.OptionData option = new Dropdown.OptionData(x.ToString());
-            dataToAdd.Add(option);
-        }
-        numDamageDiceDropdown.AddOptions(dataToAdd);
-        damageDiceSidesDropdown.AddOptions(dataToAdd);
+        List<Dropdown.OptionData> numDamageDiceData = new List<Dropdown.OptionData>();
+        List<Dropdown.OptionData> damageDiceSidesData = new List<Dropdown.OptionData>();
+
+        for (int x = 1; x < 11; x++) numDamageDiceData.Add(new Dropdown.OptionData(x.ToString()));
+
+        for(int x = 0; x < VALID_DAMAGE_DICE.Length; x++) damageDiceSidesData.Add(new Dropdown.OptionData(VALID_DAMAGE_DICE[x].ToString()));
+
+        numDamageDiceDropdown.AddOptions(numDamageDiceData);
+
+        damageDiceSidesDropdown.AddOptions(damageDiceSidesData);
 
         armorPanel.gameObject.SetActive(false);
         resultsPanel.gameObject.SetActive(false);
@@ -120,7 +124,9 @@ public class DiceRoller : MonoBehaviour
 
     public void MakeAttackRolls()
     {
+        armorPanel.gameObject.SetActive(false);
         resultsText.text = "";
+        outputString = "";
         AttackRoll();
         resultsPanel.gameObject.SetActive(true);
     }
@@ -142,16 +148,22 @@ public class DiceRoller : MonoBehaviour
         int attackRoll = 0;
         int rolledValue = 0;
 
+        AddToOutputIfVerbose("Attack Roll: ");
+
         do
         {
             rolledValue = Random.Range(1, 11);
             //Debug.Log("Rolled " + rolledValue);
+            AddToOutputIfVerbose(" " + rolledValue + " ");
             hitRoll += rolledValue;
         } while (rolledValue == 10) ;
 
+        AddToOutputIfVerbose("\n");
+
         attackRoll = hitRoll + hitBonus;
         //Debug.Log("Rolled (" + hitRoll + "+" + hitBonus + ") " + attackRoll + " vs. TGT " + targetNum);
-        resultsText.text += "Rolled " + attackRoll + " vs TN" + targetNum + " - ";
+        outputString += "Rolled " + attackRoll + " vs Target Number " + targetNum + " - ";
+
         if (attackRoll >= targetNum)
         {
             if(fullAutoToggle.isOn)
@@ -160,7 +172,7 @@ public class DiceRoller : MonoBehaviour
                 if (numHits > rof) numHits = rof;
                 Debug.Log("Hit " + numHits + " times with full auto!");
 
-                resultsText.text += "Hit " + numHits + " time(s)\n";
+                outputString += "Hit " + numHits + " time(s)\n";
                 for(int x = 0; x < numHits; x++)
                 {
                     RollDamage();
@@ -170,7 +182,7 @@ public class DiceRoller : MonoBehaviour
             {
                 int numHits = Random.Range(1, 4);
                 Debug.Log("Hit " + numHits + " times with three-round burst!");
-                resultsText.text += "Hit " + numHits + " time(s)\n";
+                outputString += "Hit " + numHits + " time(s)\n";
                 for (int x = 0; x < numHits; x++)
                 {
                     RollDamage();
@@ -184,7 +196,8 @@ public class DiceRoller : MonoBehaviour
         else
         {
             Debug.Log("MISSED!");
-            resultsText.text += "MISSED!\n";
+            outputString += "MISSED!\n";
+            resultsText.text = outputString;
         }
 
     }
@@ -274,11 +287,24 @@ public class DiceRoller : MonoBehaviour
 
     void RollDamage()
     {
-        int numDamageDice = System.Int32.Parse(numDamageDiceDropdown.value.ToString()) + 1; //+1 to compensate for odd DD issues
-        int damageDiceSides = System.Int32.Parse(damageDiceSidesDropdown.value.ToString()) + 1; //+1 to compensate for weird DD issues
+
+        int numDamageDice = System.Int32.Parse(numDamageDiceDropdown.captionText.text);
+        int damageDiceSides = System.Int32.Parse(damageDiceSidesDropdown.captionText.text);
 
         //Debug.LogWarning("Dealing " + numDamageDice + "D" + damageDiceSides);
-        int dmgRolled = Random.Range(numDamageDice, (numDamageDice * damageDiceSides) + 1);
+        int dmgRolled = 0;
+
+        AddToOutputIfVerbose("Damage Roll:");
+        for(int x = 0; x < numDamageDice; x++)
+        {
+            int roll = Random.Range(1, damageDiceSides + 1);
+
+            AddToOutputIfVerbose(" " + roll.ToString() + " ");
+
+            dmgRolled += roll;
+        }
+        AddToOutputIfVerbose("\n Total Damage Roll: " + dmgRolled + "\n");
+
         int hitLoc = GetHitLocation();
         bool armorLocHard = false;
         int armorAtLocation = GetArmorAtHitLocation(hitLoc, ref armorLocHard);
@@ -298,15 +324,16 @@ public class DiceRoller : MonoBehaviour
         //Debug.LogWarning("Rolled " + dmgRolled + " vs. armor " + armorAtLocation + " for " + damageDealt + " damage");
         Debug.Log("Dealt " + damageDealt + " to location " + GetHitLocationName(hitLoc));
 
-        string outputString = "";
+
         //Terse output
+
         if(terseOutputToggle.isOn)
         {
-            outputString = damageDealt.ToString() + " Damage - " + GetHitLocationName(hitLoc) + "\n";
+            outputString += damageDealt.ToString() + " Damage - " + GetHitLocationName(hitLoc) + "\n";
         }
         else if(verboseOutputToggle.isOn)
         {
-            outputString =  "Rolled " + numDamageDice.ToString() + "d" + damageDiceSides.ToString() +
+            outputString +=  "Rolled " + numDamageDice.ToString() + "d" + damageDiceSides.ToString() +
                             ", dealing " + damageDealt.ToString() + " to the " + GetHitLocationName(hitLoc) + 
                             " which had " + targetArmor.armorVal[hitLocationArmorArrayLocationPair[hitLoc]].ToString() + " armor\n";
         }
@@ -374,5 +401,10 @@ public class DiceRoller : MonoBehaviour
             armorhardnessToggles[x].isOn = profile.isHard[x];
             armorhardnessToggles[x].interactable = false;
         }
+    }
+
+    void AddToOutputIfVerbose(string output)
+    {
+        if (verboseOutputToggle.isOn) outputString += output;
     }
 }
